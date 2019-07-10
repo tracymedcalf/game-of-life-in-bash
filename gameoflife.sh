@@ -5,14 +5,31 @@
 #above (i : Int) : Int { return if (i < w) { i + lastRow1stCol } else { i - w } }
 #below (i : Int) : Int { return if (i >= lastRow1stCol) { i - lastRow1stCol } else { i } }
 
-right () {
-    if [ $1 -eq $width ]; then
-        echo $width
+# gives i value for right when $2 is width
+# gives j value for below when $2 is height
+right_or_below () {
+    if [ $1 -eq $2 ]; then
+        echo 1
     else
-        echo $1
+        echo `expr $1 + 1`
     fi
 }
 
+left_or_above () {
+    if [ $1 -eq 1 ]; then
+        echo $2
+    else
+        echo `expr $1 - 1`
+    fi
+}
+
+neighbor_sum() {
+    local _left_i=`left_or_above $i $width`
+    local _right_i=`right_or_below $i $width`
+    local _below_j=`right_or_below $j $height`
+    local _above_j=`left_or_above $j $height`
+    echo `expr ${world[$_left_i,$j]} + ${world[$_right_i,$j]} + ${world[$i,$_below_j]} + ${world[$i,$_above_j]} + ${world[$i,$j]}`
+}
 
 #neighborsIndices(i : Int) : IntArray {
 #    val right = right(i)
@@ -44,15 +61,21 @@ done
 
 echo "Press enter to see next board. ctrl-c to quit."
 while [ "" = "$( read -e )" ]; do
-    for i in `seq $height`; do
-        for j in `seq $width`; do
-            world[$i,$j]=$( right $j )
-        done
-    done
+    # print the world
     for i in `seq $height`; do
         for j in `seq $width`; do
             printf "%2s" ${world[$i,$j]}
         done
         echo ""
+    done
+    # set the world
+    for i in `seq $height`; do
+        for j in `seq $width`; do
+            if [ `neighbor_sum` -gt "2" ]; then
+                world[$i,$j]=1;
+            else
+                world[$i,$j]=0;
+            fi
+        done
     done
 done
