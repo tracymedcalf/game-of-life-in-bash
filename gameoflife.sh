@@ -21,15 +21,15 @@ left_or_above () {
 }
 
 neighbor_sum() {
-    local _left_i=`left_or_above $i $width`
-    local _right_i=`right_or_below $i $width`
-    local _below_j=`right_or_below $j $height`
-    local _above_j=`left_or_above $j $height`
-    echo `expr ${world[$_left_i,$j]} + ${world[$_right_i,$j]} + ${world[$i,$_below_j]} + ${world[$i,$_above_j]} + ${world[$i,$j]}`
+    local left_i=`left_or_above $i $width`
+    local right_i=`right_or_below $i $width`
+    local below_j=`right_or_below $j $height`
+    local above_j=`left_or_above $j $height`
+    echo `expr ${world[$left_i,$j]} + ${world[$right_i,$j]} + ${world[$i,$below_j]} + ${world[$i,$above_j]} + ${world[$i,$j]}`
 }
 
 # check for arguments
-if [ $# -ne 0 ]; then
+if [ $# -eq 2 ]; then
     height=$1;
     width=$2;
 else
@@ -50,7 +50,7 @@ for i in `seq $height`; do
 done
 
 echo "Press enter to see next board. ctrl-c to quit."
-while [ "" = "$( read -e )" ]; do
+while read -e; do
     # print the world
     for i in `seq $height`; do
         for j in `seq $width`; do
@@ -61,7 +61,7 @@ while [ "" = "$( read -e )" ]; do
     # set the world
     for i in `seq $height`; do
         for j in `seq $width`; do
-            if [ `neighbor_sum` -gt "2" ]; then
+            if [ `neighbor_sum` -gt 2 ]; then
                 world[$i,$j]=1;
             else
                 world[$i,$j]=0;
